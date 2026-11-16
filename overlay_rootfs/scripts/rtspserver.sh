@@ -51,6 +51,28 @@ if [ "$1" = "watchdog" ] && [ "$RTMP_ENABLE" = "on" ] && [ "$RTMP_RESTART" != ""
   echo `date +"%Y/%m/%d %H:%M:%S"` ": go2rtc stop"
 fi
 
+# RTMP publish check: go2rtc does not retry a publish that failed (for example when it comes back from the periodic
+# restart above and the first connect fails), so the RTMP stream stays down until go2rtc restarts.
+# Restart go2rtc when video0 has no consumer, or when the bytes its consumers sent did not grow since the previous
+# watchdog run of the same go2rtc process. A go2rtc seen for the first time only records its counter.
+RTMP_STATE=/tmp/rtmp_publish.state
+if [ "$1" = "watchdog" ] && [ "$RTMP_ENABLE" = "on" ] && grep -q '^RTMP_URL *= *[^ ]' $HACK_INI && GO2RTC_PID=`pidof go2rtc` ; then
+  SENT=`wget -q -T 5 -O - http://127.0.0.1:1984/api/streams 2> /dev/null | grep -o '"send":[0-9]*' | awk -F: '{ s += $2 } END { print s + 0 }'`
+  LAST_PID=""
+  LAST_SENT=0
+  [ -f $RTMP_STATE ] && read LAST_PID LAST_SENT < $RTMP_STATE
+  echo "$GO2RTC_PID $SENT" > $RTMP_STATE
+  if [ "$GO2RTC_PID" = "$LAST_PID" ] && [ "$SENT" -le "${LAST_SENT:-0}" ] ; then
+    echo `date +"%Y/%m/%d %H:%M:%S"` ": rtmp publish stalled (sent $SENT bytes), restarting go2rtc"
+    rm -f $RTMP_STATE
+    while pidof go2rtc > /dev/null ; do
+      killall go2rtc > /dev/null 2>&1
+      sleep 0.5
+    done
+    echo `date +"%Y/%m/%d %H:%M:%S"` ": go2rtc stop"
+  fi
+fi
+
 if [ "$1" = "watchdog" ]; then
   [ "$RTSP_VIDEO0" = "on" -o "$RTSP_VIDEO1" = "on" -o "$RTSP_VIDEO2" = "on" ] || exit 0
 fi
