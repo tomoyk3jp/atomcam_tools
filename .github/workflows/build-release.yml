@@ -1,0 +1,49 @@
+name: build-release
+
+# Builds atomcam_tools.zip with the repository's own build container and
+# attaches it to a GitHub release. Manual trigger only.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to create (for example v-sleepstop-1)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Start builder container
+        run: docker compose up -d
+
+      - name: Build
+        run: docker compose exec -T builder /src/buildscripts/build_all
+
+      - name: Checksums
+        run: |
+          sudo chown -R "$USER" . || true
+          mkdir -p out
+          cp atomcam_tools.zip out/
+          unzip -o -q atomcam_tools.zip -d out/files
+          (cd out/files && md5sum * | tee ../md5sums.txt)
+          echo "authorized_keys bytes: $(wc -c < out/files/authorized_keys)"
+          echo "hostname: $(cat out/files/hostname)"
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.tag }}" out/atomcam_tools.zip out/md5sums.txt \
+            --title "${{ inputs.tag }}" --notes "Built from ${GITHUB_SHA} by the build-release workflow. See md5sums.txt for the checksums of the files inside the zip."
