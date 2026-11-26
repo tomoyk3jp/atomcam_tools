@@ -592,6 +592,14 @@ AtomCamからPCまでの経路でのパケット伝送が保障されますが�
 
 変更するとRTSP Main/SubのURLが変わります。
 
+#### アプリOFF中はRTSPを停止
+
+Atom CamアプリでカメラをOFF（スリープ）にしている間、RTSPサーバー(v4l2rtspserver)を停止します。ONに戻すと1分以内に自動で再開します。
+
+標準ではOFFです。ONにすると、アプリOFF中は映像が配信されません。
+
+OFFかどうかは `http://<カメラ>/cgi-bin/cmd.cgi?name=sleep` で `SLEEP=1`（OFF）/ `SLEEP=0`（ON）として読めます。
+
 #### パスワード認証
 
 RTSPにパスワード認証を要求します。

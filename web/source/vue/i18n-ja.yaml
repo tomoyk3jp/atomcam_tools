@@ -262,6 +262,9 @@ RTSP:
   http:
     title: RTSP over HTTP
     tooltip: RTSPをHTTP経由で配信します
+  sleepStop:
+    title: アプリOFF中はRTSPを停止
+    tooltip: Atom CamアプリでカメラをOFFにしている間はRTSPサーバーを停止し、ONに戻すと再開します
   auth:
     title: パスワード認証
     tooltip: RTSPにパスワード認証を要求します

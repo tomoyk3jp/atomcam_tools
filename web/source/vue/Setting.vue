@@ -238,6 +238,7 @@
           <SettingInput v-if="config.RTSP_VIDEO1 === 'on'" i18n="RTSP.sub.URL" :titleOffset="2" :span="10" type="readonly" v-model="RtspUrl1" />
           <div v-if="(config.RTSP_VIDEO0 === 'on') || (config.RTSP_VIDEO1 === 'on') || (config.RTSP_VIDEO2 === 'on')">
             <SettingSwitch i18n="RTSP.http" v-model="config.RTSP_OVER_HTTP" />
+            <SettingSwitch i18n="RTSP.sleepStop" v-model="config.RTSP_SLEEP_STOP" />
             <SettingSwitch i18n="RTSP.auth" v-model="config.RTSP_AUTH" />
             <SettingInput v-if="config.RTSP_AUTH === 'on'" i18n="RTSP.account" type="text" :titleOffset="2" v-model="config.RTSP_USER" />
             <SettingInput v-if="config.RTSP_AUTH === 'on'" i18n="RTSP.password" type="password" :titleOffset="2" v-model="config.RTSP_PASSWD" show-password />
@@ -462,6 +463,7 @@
           RTSP_VIDEO2: 'off',
           RTSP_AUDIO2: 'off',
           RTSP_OVER_HTTP: 'off',
+          RTSP_SLEEP_STOP: 'off',
           RTSP_AUTH: 'off',
           RTSP_USER: '',
           RTSP_PASSWD: '',
@@ -1452,6 +1454,7 @@
         }
         if((this.config.RTSP_VIDEO0 === 'on') || (this.config.RTSP_VIDEO1 === 'on') || (this.config.RTSP_VIDEO2 === 'on')) {
           if((this.config.RTSP_OVER_HTTP !== this.oldConfig.RTSP_OVER_HTTP) ||
+             (this.config.RTSP_SLEEP_STOP !== this.oldConfig.RTSP_SLEEP_STOP) ||
              (this.config.RTSP_AUTH !== this.oldConfig.RTSP_AUTH) ||
              (this.config.RTSP_USER !== this.oldConfig.RTSP_USER) ||
              (this.config.RTSP_PASSWD !== this.oldConfig.RTSP_PASSWD) ||
