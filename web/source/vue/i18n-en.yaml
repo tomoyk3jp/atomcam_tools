@@ -261,6 +261,9 @@ RTSP:
   http:
     title: RTSP over HTTP
     tooltip: Use HTTP for RTSP streaming
+  sleepStop:
+    title: Stop RTSP while the app is off
+    tooltip: Stop the RTSP server while the Atom Cam app has the camera switched off, and start it again when it is switched on.
   auth:
     title: Authentication
     tooltip: Require password authentication for RTSP.

@@ -20,6 +20,16 @@ if [ "$1" = "off" -o "$1" = "restart" ]; then
 fi
 
 HACK_INI=/tmp/hack.ini
+RTSP_SLEEP_STOP=$(awk -F "=" '/^RTSP_SLEEP_STOP *=/ {print $2}' $HACK_INI)
+# While the Atom Cam app is switched off (/atom/configs/.camera_sleep exists), keep v4l2rtspserver stopped.
+# It is started again by the next watchdog run once the flag is gone.
+if [ "$RTSP_SLEEP_STOP" = "on" -a -e /atom/configs/.camera_sleep ]; then
+  if pidof v4l2rtspserver > /dev/null ; then
+    killall v4l2rtspserver > /dev/null 2>&1
+    echo `date +"%Y/%m/%d %H:%M:%S"` ": camera sleep, v4l2rtspserver stop"
+  fi
+  exit 0
+fi
 RTMP_ENABLE=$(awk -F "=" '/^RTMP_ENABLE *=/ {print $2}' $HACK_INI)
 RTMP_RESTART=$(awk -F "=" '/^RTMP_RESTART *=/ {if($2 > 0) print $2}' $HACK_INI)
 RTSP_VIDEO0=$(awk -F "=" '/^RTSP_VIDEO0 *=/ {print $2}' $HACK_INI)
